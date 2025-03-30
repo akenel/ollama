@@ -6,7 +6,74 @@
 
 # Ollama
 
+Essentials:
+DockerDesktok running
+kubectl 
+helm
+
+
+Normally, ollama will be accessed via curl http://localhost:11434/api/generate -d '{
+  "model": "llama3.2",
+  "prompt": "Why is the sky blue?",
+  "stream": false
+}'
+
+In the examples, below http://localhost:11434 is replaced to run in the kubernetes cluster using the default namespace :) 
+minikube service ollama [dynmaically assigned URL:PORT>)](http://127.0.0.1:54864)
+
+ ⚡angel ❯❯ minikube service ollama
+|-----------|--------|-------------|--------------|
+| NAMESPACE |  NAME  | TARGET PORT |     URL      |
+|-----------|--------|-------------|--------------|
+| default   | ollama |             | No node port |
+|-----------|--------|-------------|--------------|
+😿  service default/ollama has no node port
+❗  Services [default/ollama] have type "ClusterIP" not meant to be exposed, however for local development minikube allows you to access this !
+🏃  Starting tunnel for service ollama.
+|-----------|--------|-------------|------------------------|
+| NAMESPACE |  NAME  | TARGET PORT |          URL           |
+|-----------|--------|-------------|------------------------|
+| default   | ollama |             | http://127.0.0.1:54864 |
+|-----------|--------|-------------|------------------------|
+🎉  Opening service default/ollama in default browser...
+❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
 Get up and running with large language models.
+Here's a step-by-step table of essential `cURL` commands for managing Ollama in your Minikube environment. This guide covers starting the server, loading models, running them, renaming, and other useful operations. 🚀  
+
+### 🔹 **Essential cURL Commands for Ollama**
+
+| 🔢 **Step** | 🛠️ **Command** | 📌 **Description & Tips** | ⚠️ **Gotchas & Extra Info** |
+|------------|--------------|------------------------|----------------------------|
+| **1️⃣ Check if Ollama is running** | `curl http://127.0.0.1:54864/api/tags` | Checks if the API is responsive. | If empty (`{"models":[]}`), no models are loaded. |
+| **2️⃣ List all available models** | `curl http://127.0.0.1:54864/api/tags` | Shows models currently available in Ollama. | If no models appear, download one using step 3. |
+| **3️⃣ Download and install a model** | `curl -X POST http://127.0.0.1:54864/api/pull -d '{"name": "llama3.2"}' -H "Content-Type: application/json"` | Pulls the **Llama 3.2** model for local use. | This can take some time. Check logs if it fails. |
+| **4️⃣ Verify the model is installed** | `curl http://127.0.0.1:54864/api/tags` | Confirms that the model was successfully installed. | If missing, reattempt step 3. |
+| **5️⃣ Run a model** | `curl -X POST http://127.0.0.1:54864/api/generate -d '{"model": "llama3.2", "prompt": "Hello, world!"}' -H "Content-Type: application/json"` | Runs the model with a simple prompt. | Adjust `"prompt"` to test different inputs. |
+| **6️⃣ Rename a model** | `curl -X POST http://127.0.0.1:54864/api/tag -d '{"source": "llama3.2", "tag": "custom-llama"}' -H "Content-Type: application/json"` | Renames `llama3.2` to `custom-llama`. | Helps in organizing multiple versions. |
+| **7️⃣ Reload all models** | `curl -X POST http://127.0.0.1:54864/api/reload` | Reloads models without restarting Ollama. | Useful after adding/removing models. |
+| **8️⃣ Remove a model** | `curl -X DELETE http://127.0.0.1:54864/api/delete -d '{"name": "custom-llama"}' -H "Content-Type: application/json"` | Deletes a specific model. | Use the exact name from `api/tags`. |
+| **9️⃣ Show system info** | `curl http://127.0.0.1:54864/api/info` | Displays system & model status. | Useful for debugging issues. |
+| **🔟 Stop Ollama gracefully** | `curl -X POST http://127.0.0.1:54864/api/stop` | Stops the Ollama service. | May require admin privileges. |
+
+---
+
+### 💡 **Bonus Tips & Tricks**
+- **📡 Minikube Port Forwarding**:  
+  If Ollama runs inside Minikube, forward the port to your host:  
+  ```bash
+  kubectl port-forward svc/ollama 54864:80
+  ```
+- **🚀 Load Multiple Models in One Request**:  
+  ```bash
+  curl -X POST http://127.0.0.1:54864/api/pull -d '{"name": "mistral, gemma"}' -H "Content-Type: application/json"
+  ```
+- **📝 Save Responses to a File**:  
+  ```bash
+  curl http://127.0.0.1:54864/api/info -o ollama_info.json
+  ```
+- **🔄 Automate Ollama Model Load on Start**:  
+  Add `curl` commands in your Minikube Helm `values.yaml` file for auto-loading.
 
 ### macOS
 
